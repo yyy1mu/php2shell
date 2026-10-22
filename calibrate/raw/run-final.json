@@ -1,0 +1,86 @@
+[
+  {
+    "tag": "php:8.5.11-apache",
+    "image_id": "sha256:b384c1b31d2008af2160a735bb856317926f893553293f526024019a31d0fd6b",
+    "repo_digest": "docker.1panel.live/library/php@sha256:47e6d8849049375e0d19e81f1b391ed88828d4653e0d1b00822185b66b564e8b",
+    "php_version": "8.5.11",
+    "collected_at": "2026-10-21T21:55:05Z",
+    "heap": {
+      "profile": "bookworm",
+      "htdata": "0x690d8",
+      "stage1_n": 841,
+      "stage2_t": 406,
+      "stage2_v": 16,
+      "stage3_pads": "[(31,31)]*6",
+      "sid": "attacksessionid0001"
+    },
+    "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+    "zif_system": "0x5996e0",
+    "zval_ptr_dtor": "0x7b47a0",
+    "delta_dtor_to_zif": "-0x21b0c0",
+    "verified": false,
+    "run": {
+      "ok": false,
+      "elapsed_s": 33.2,
+      "proof": "",
+      "marker": "",
+      "rc": 1
+    }
+  },
+  {
+    "tag": "php:8.4.26-apache",
+    "image_id": "sha256:46b195b6378e712d1a65cd3f853242bebd7f3cb4cafe137fd592b365909d2c17",
+    "repo_digest": "php@sha256:60111400ff77bdc44fa79b4f072afe49a42abba71e0846ad496be4761dc9c11a",
+    "php_version": "8.4.26",
+    "collected_at": "2026-10-21T21:55:42Z",
+    "heap": {
+      "profile": "bookworm",
+      "htdata": "0x690d8",
+      "stage1_n": 841,
+      "stage2_t": 406,
+      "stage2_v": 16,
+      "stage3_pads": "[(31,31)]*6",
+      "sid": "attacksessionid0001"
+    },
+    "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+    "zif_system": "0x465370",
+    "zval_ptr_dtor": "0x65eb60",
+    "delta_dtor_to_zif": "-0x1f97f0",
+    "verified": true,
+    "run": {
+      "ok": true,
+      "elapsed_s": 7.4,
+      "proof": "uid=33(www-data) gid=33(www-data) groups=33(www-data)",
+      "marker": "PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)",
+      "rc": 0
+    }
+  },
+  {
+    "tag": "php:8.5.10-apache",
+    "image_id": "sha256:884bb79798900bbe8b84263c1d5f1aa692034c17a763b601221e94c696f473e5",
+    "repo_digest": "php@sha256:e7c4a78bc342384903c942f50329636cf9c9d0b1b51860065f443c048f260c43",
+    "php_version": "8.5.10",
+    "collected_at": "2026-10-21T21:55:53Z",
+    "heap": {
+      "profile": "bookworm",
+      "htdata": "0x690d8",
+      "stage1_n": 841,
+      "stage2_t": 406,
+      "stage2_v": 16,
+      "stage3_pads": "[(31,31)]*6",
+      "sid": "attacksessionid0001"
+    },
+    "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+    "zif_system": "0x598d60",
+    "zval_ptr_dtor": "0x7b3860",
+    "delta_dtor_to_zif": "-0x21ab00",
+    "verified": true,
+    "run": {
+      "ok": true,
+      "elapsed_s": 7.6,
+      "proof": "uid=33(www-data) gid=33(www-data) groups=33(www-data)",
+      "marker": "PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)",
+      "rc": 0
+    }
+  }
+]

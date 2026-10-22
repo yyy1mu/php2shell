@@ -1,0 +1,76 @@
+[
+  {
+    "tag": "php:8.5.12-apache",
+    "image_id": "sha256:3aaf6c3363d21d928e512092ef5af8a3528cbde3bd001401e389242d94796cae",
+    "repo_digest": "php@sha256:4d1f268dd3b670bd003861c5385cb2f8ba7196dbc88ee84dcae47270c116f242",
+    "php_version": "8.5.12",
+    "collected_at": "2026-10-21T21:52:28Z",
+    "heap": {
+      "profile": "bookworm",
+      "htdata": 430296,
+      "stage1_n": 841,
+      "stage2_t": 406,
+      "stage2_v": 16,
+      "stage3_pads": "[(31,31)]*6",
+      "sid": "attacksessionid0001"
+    },
+    "verified": null,
+    "error": "offsets.py 失败（php:8.5.12-apache）: cannot copy /usr/lib/apache2/modules/libphp.so from container 'calib-symbols': Error response from daemon: No such container: calib-symbols"
+  },
+  {
+    "tag": "php:8.3.36-apache",
+    "image_id": "sha256:7ee673f08963aa38fcbd9732a209b20bc74a9fe264feeed8252ec4594734ccea",
+    "repo_digest": "php@sha256:d89e8b3d2033c3179dcd9999d913670eb12a07410a95e60205c64e7d0fac7aef",
+    "php_version": "8.3.36",
+    "collected_at": "2026-10-21T21:52:29Z",
+    "heap": {
+      "profile": "bookworm",
+      "htdata": 430296,
+      "stage1_n": 841,
+      "stage2_t": 406,
+      "stage2_v": 16,
+      "stage3_pads": "[(31,31)]*6",
+      "sid": "attacksessionid0001"
+    },
+    "verified": null,
+    "error": "offsets.py 失败（php:8.3.36-apache）: cannot copy /usr/lib/apache2/modules/libphp.so from container 'calib-symbols': Error response from daemon: No such container: calib-symbols"
+  },
+  {
+    "tag": "php:8.2.35-apache",
+    "image_id": "sha256:745174152c4e5ddc9854adea24a2c408129c27384010e29b31303e1b50e3caae",
+    "repo_digest": "php@sha256:9c371129bfc78a90269f140b6dcebf826591dc35865a1076c218d765731de732",
+    "php_version": "8.2.35",
+    "collected_at": "2026-10-21T21:52:30Z",
+    "heap": {
+      "profile": "bookworm",
+      "htdata": 430296,
+      "stage1_n": 841,
+      "stage2_t": 406,
+      "stage2_v": 16,
+      "stage3_pads": "[(31,31)]*6",
+      "sid": "attacksessionid0001"
+    },
+    "verified": null,
+    "zif_system": "0x3a1da0",
+    "zval_ptr_dtor": "0x491910",
+    "delta_dtor_to_zif": "-0xefb70"
+  },
+  {
+    "tag": "php:7.4.21-apache",
+    "image_id": "sha256:85010dbbaa84d78e2a4c83bb4d6c1fa9b2fb94e383cc1cc1f32ec555603fe93f",
+    "repo_digest": "php@sha256:eb212d85f4f560b437962b04abcd3c553035f9fb1567831b83a2c40e121dadc9",
+    "php_version": "7.4.21",
+    "collected_at": "2026-10-21T21:52:31Z",
+    "heap": {
+      "profile": "bookworm",
+      "htdata": 430296,
+      "stage1_n": 841,
+      "stage2_t": 406,
+      "stage2_v": 16,
+      "stage3_pads": "[(31,31)]*6",
+      "sid": "attacksessionid0001"
+    },
+    "verified": null,
+    "error": "offsets.py 失败（php:7.4.21-apache）: cannot copy /usr/lib/apache2/modules/libphp.so from container 'calib-symbols': Error response from daemon: Could not find the file /usr/lib/apache2/modules/libphp.so in container calib-symbols"
+  }
+]

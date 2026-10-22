@@ -1,0 +1,58 @@
+[
+  {
+    "tag": "php:8.5.10-apache",
+    "image_id": "sha256:884bb79798900bbe8b84263c1d5f1aa692034c17a763b601221e94c696f473e5",
+    "repo_digest": "php@sha256:e7c4a78bc342384903c942f50329636cf9c9d0b1b51860065f443c048f260c43",
+    "php_version": "8.5.10",
+    "collected_at": "2026-10-21T21:53:48Z",
+    "heap": {
+      "profile": "bookworm",
+      "htdata": "0x690d8",
+      "stage1_n": 841,
+      "stage2_t": 406,
+      "stage2_v": 16,
+      "stage3_pads": "[(31,31)]*6",
+      "sid": "attacksessionid0001"
+    },
+    "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+    "zif_system": "0x598d60",
+    "zval_ptr_dtor": "0x7b3860",
+    "delta_dtor_to_zif": "-0x21ab00",
+    "verified": false,
+    "run": {
+      "ok": false,
+      "elapsed_s": 7.3,
+      "proof": "",
+      "marker": "HEAP_LEAK_FAILED",
+      "rc": 1
+    }
+  },
+  {
+    "tag": "php:8.5.12-apache",
+    "image_id": "sha256:3aaf6c3363d21d928e512092ef5af8a3528cbde3bd001401e389242d94796cae",
+    "repo_digest": "php@sha256:4d1f268dd3b670bd003861c5385cb2f8ba7196dbc88ee84dcae47270c116f242",
+    "php_version": "8.5.12",
+    "collected_at": "2026-10-21T21:53:59Z",
+    "heap": {
+      "profile": "bookworm",
+      "htdata": "0x690d8",
+      "stage1_n": 841,
+      "stage2_t": 406,
+      "stage2_v": 16,
+      "stage3_pads": "[(31,31)]*6",
+      "sid": "attacksessionid0001"
+    },
+    "libphp_path": "/usr/lib/apache2/modules/libphp.so",
+    "zif_system": "0x59fae0",
+    "zval_ptr_dtor": "0x7c11a0",
+    "delta_dtor_to_zif": "-0x2216c0",
+    "verified": false,
+    "run": {
+      "ok": false,
+      "elapsed_s": 4.4,
+      "proof": "",
+      "marker": "HEAP_LEAK_FAILED",
+      "rc": 1
+    }
+  }
+]
