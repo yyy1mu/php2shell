@@ -140,3 +140,112 @@ offsets 文件），把参数摊到命令行。
 ## 免责
 
 只在自己的环境或者拿到书面授权的目标上用。打别人的站是违法的。
+
+---
+
+## 目录结构
+
+```
+php8-exp/
+├── README.md              本文件：环境、用法、注意事项
+├── FINDINGS.md            ★ 本轮全部实测结论（能打/不能打、踩坑、检测）
+├── CALIBRATION.md         堆常量标定方法与数据
+├── calibration.json       标定结果
+├── php8.5.11/             8.5.11 靶场 + exploit（端口 8088）
+├── php8.4.26/             8.4.26 靶场 + exploit（端口 8089）
+├── calibrate/             标定工具
+├── docs/                  第三方分析与研究文档
+│   ├── PHP2Shell-8.5.11-漏洞深度分析.md     本轮的深度分析（gdb 证据）
+│   ├── PHP2Shell-leak-8.2-分析.md           8.2 泄漏分析
+│   └── RESEARCH_PURE_128M.md                pure 链（display_errors=Off）研究
+└── scripts/
+    ├── fix_ptr_range.py          ★ 修复指针范围（换环境打不通先跑这个）
+    ├── pure_128M_exploit.py      display_errors=Off / 128M / 150 worker 全链
+    ├── php7421_poc.py            7.4.21 触发脚本（链不适用，留作研究）
+    ├── mk_a1.py / mk_leak_b.py   pure 链的 A1 / B1 构造器
+    ├── chunked_send.py           chunked 发包（绕过 post_max_size）
+    └── decode_cookie.py          泄漏 cookie 解码
+```
+
+---
+
+## 换环境打不通？先跑这个
+
+**这是最常见的坑**：公开脚本普遍把堆指针范围写死成 `0x7f0000000000`，但 Linux ASLR
+的 mmap 落点可能是 `0x76xx` / `0x7cxx` / `0x72xx`。结果是**泄漏其实成功了**，
+但解析函数把所有指针过滤掉，返回 0，看起来像"堆布局不对、需要重新标定"。
+
+```bash
+python3 scripts/fix_ptr_range.py .        # 修复当前目录所有 .py
+python3 scripts/fix_ptr_range.py -n .     # 先看看会改什么
+```
+
+修复内容：`0x7F0000000000` → `0x500000000000`（下界）。
+
+判断方法：**看泄漏响应的 hexdump**。如果 4096 / 819208 字节里明明有
+`0x76a9108a70a0` 这类指针，但脚本报 `no heap pointers`，就是这个坑。
+
+---
+
+## display_errors=Off 也能打
+
+不少人以为关掉 `display_errors` 就能防住，**实测不行**。
+
+| 配置 | 结果 |
+|---|---|
+| 8.4.26 / display_errors=On / 8M / 单 worker | ✅ RCE |
+| 8.4.26 / **display_errors=Off** / **128M** / **150 worker** | ✅ **RCE** |
+
+后者用的是 pure 链（`scripts/pure_128M_exploit.py`），关键点：
+
+1. **worker pinning**：先占住 149 个半截 POST，让 A1/B1/A2/B2 落到同一个 child；
+2. **chunked 绕过 post_max_size**：不带 Content-Length → `content_length=0` → 跳过检查；
+3. A1 用 860 个 depth-64 嵌套文件字段 + burner，让 OOM 精确落在 `php_url_encode`；
+4. B1 伪造 zend_string 头，一次读 800KB，同时拿到 chunk base 和 libphp base。
+
+实测输出：
+```
+pinned 150/150 workers (149 holders)
+[try 1] decoded=819208 zval_ptr_dtor=0x7c1a77183b60 -> libphp=0x7c1a76b25000
+[4/4] RCE OK
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+```
+
+---
+
+## 哪些环境打不了
+
+| 目标 | 结论 |
+|---|---|
+| nginx + php-fpm | ❌ 链不适用。FPM 在 OOM 后**杀 worker 重建**（`exit code 70`），悬空指针留不住；多 worker 更是连堆都不共享 |
+| PHP 7.4 / 8.1 及更早 | ❌ 链不适用。`reset_id` 无条件清零 `send_cookie`，且 upload-progress 回调有 `progress->sid` 前置检查 |
+
+FPM 那条链（`BG(unserialize)`）是完全不同的机制，需要双 pool + 应用 `session_start()`
++ 能写 session 引用，门槛高得多，见 `FINDINGS.md` 第 2 节。
+
+---
+
+## 检测与缓解
+
+**最有效的单条检测规则**：
+
+```
+Set-Cookie: PHPSESSID= 的值长度 > 64 字节
+```
+
+正常 session id 是 32 字符，泄漏链会返回 4096 / 819208 字节。这一条能覆盖链 A 和链 B。
+
+日志特征：
+```
+Session cookie cannot be sent after headers have already been sent
+Allowed memory size of ... exhausted
+zend_mm_heap corrupted
+child pid N exit signal Abort (6)
+```
+
+缓解：升级到 8.5.12 / 8.4.27 / 8.3.36 / 8.2.35。无法升级时
+`session.upload_progress.enabled=Off` 可直接断链。
+
+**`display_errors=Off` 不是缓解措施。**
+
+详见 `FINDINGS.md` 第 7 节。
